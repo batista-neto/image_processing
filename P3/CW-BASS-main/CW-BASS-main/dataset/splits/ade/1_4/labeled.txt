@@ -1,0 +1,16 @@
+ade/JPEGImages/ADE_val_00001306.jpg ade/SegmentationClass/ADE_val_00001306.png
+ade/JPEGImages/ADE_val_00001369.jpg ade/SegmentationClass/ADE_val_00001369.png
+ade/JPEGImages/ADE_val_00001083.jpg ade/SegmentationClass/ADE_val_00001083.png
+ade/JPEGImages/ADE_val_00001287.jpg ade/SegmentationClass/ADE_val_00001287.png
+ade/JPEGImages/ADE_val_00001715.jpg ade/SegmentationClass/ADE_val_00001715.png
+ade/JPEGImages/ADE_val_00001511.jpg ade/SegmentationClass/ADE_val_00001511.png
+ade/JPEGImages/ADE_val_00001258.jpg ade/SegmentationClass/ADE_val_00001258.png
+ade/JPEGImages/ADE_val_00001895.jpg ade/SegmentationClass/ADE_val_00001895.png
+ade/JPEGImages/ADE_val_00001725.jpg ade/SegmentationClass/ADE_val_00001725.png
+ade/JPEGImages/ADE_val_00001112.jpg ade/SegmentationClass/ADE_val_00001112.png
+ade/JPEGImages/ADE_val_00001608.jpg ade/SegmentationClass/ADE_val_00001608.png
+ade/JPEGImages/ADE_val_00001248.jpg ade/SegmentationClass/ADE_val_00001248.png
+ade/JPEGImages/ADE_val_00001657.jpg ade/SegmentationClass/ADE_val_00001657.png
+ade/JPEGImages/ADE_val_00001474.jpg ade/SegmentationClass/ADE_val_00001474.png
+ade/JPEGImages/ADE_val_00001229.jpg ade/SegmentationClass/ADE_val_00001229.png
+ade/JPEGImages/ADE_val_00001268.jpg ade/SegmentationClass/ADE_val_00001268.png

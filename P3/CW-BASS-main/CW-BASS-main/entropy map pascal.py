@@ -12,7 +12,7 @@ from model.semseg.deeplabv3plus import DeepLabV3Plus  # Import the model class
 
 def load_model_from_checkpoint(checkpoint_path, model_class, device='cpu'):
     # Initialize the model
-    model = model_class(backbone='resnet101', nclass=21).to(device)
+    model = model_class(backbone='resnet101', nclass=150).to(device)
     model = torch.nn.DataParallel(model) if torch.cuda.device_count() > 1 else model
 
     # Load the checkpoint
@@ -182,15 +182,38 @@ def create_figure(image_path, label_path, model, class_names, device='cpu'):
     plt.show()
 
 # Paths and parameters
-checkpoint_path = 'xxxh'  # Update with your checkpoint path
-image_path = 'xxx'  # Update with your image path
-label_path = 'xxx'  # Update with your ground truth mask path
-class_names = [
+checkpoint_path = 'outdir/models/ade/1_8/split_0/best_checkpoint.pth'  # Update with your checkpoint path
+image_path = 'ade/JPEGImages/ADE_train_00000002.jpg'  # Update with your image path
+ground_truth_path = 'ade/SegmentationClass/ADE_train_00000002.png'  # Update with your ground truth mask path
+class_names_pascal = [
     'background', 'aeroplane', 'bicycle', 'bird', 'boat',
     'bottle', 'bus', 'car', 'cat', 'chair',
     'cow', 'diningtable', 'dog', 'horse', 'motorbike',
     'person', 'potted plant', 'sheep', 'sofa', 'train', 'tv/monitor'
 ]
+
+class_names = [
+    'wall', 'building', 'sky', 'floor', 'tree', 'ceiling', 'road', 'bed', 'windowpane', 'grass',
+    'cabinet', 'sidewalk', 'person', 'earth', 'door', 'table', 'mountain', 'plant', 'curtain',
+    'chair', 'car', 'water', 'painting', 'sofa', 'shelf', 'house', 'sea', 'mirror', 'rug',
+    'field', 'armchair', 'seat', 'fence', 'desk', 'rock', 'wardrobe', 'lamp', 'bathtub',
+    'railing', 'cushion', 'base', 'box', 'column', 'signboard', 'chest of drawers', 'counter',
+    'sand', 'sink', 'skyscraper', 'fireplace', 'refrigerator', 'grandstand', 'path', 'stairs',
+    'runway', 'case', 'pool table', 'pillow', 'screen door', 'stairway', 'river', 'bridge',
+    'bookcase', 'blind', 'coffee table', 'toilet', 'flower', 'book', 'hill', 'bench', 'countertop',
+    'stove', 'palm', 'kitchen island', 'computer', 'swivel chair', 'boat', 'bar', 'arcade machine',
+    'hovel', 'bus', 'towel', 'light', 'truck', 'tower', 'chandelier', 'awning', 'streetlight',
+    'booth', 'television receiver', 'airplane', 'dirt track', 'apparel', 'pole', 'land', 'bannister',
+    'escalator', 'ottoman', 'bottle', 'buffet', 'poster', 'stage', 'van', 'ship', 'fountain',
+    'conveyer belt', 'canopy', 'washer', 'plaything', 'swimming pool', 'stool', 'barrel', 'basket',
+    'waterfall', 'tent', 'bag', 'minibike', 'cradle', 'oven', 'ball', 'food', 'step', 'tank',
+    'trade name', 'microwave', 'pot', 'animal', 'bicycle', 'lake', 'dishwasher', 'screen',
+    'blanket', 'sculpture', 'hood', 'sconce', 'vase', 'traffic light', 'tray', 'ashcan',
+    'fan', 'pier', 'crt screen', 'plate', 'monitor', 'bulletin board', 'shower', 'radiator',
+    'glass', 'clock', 'flag'
+]
+
+
 
 # Initialize device and model
 device = 'cuda' if torch.cuda.is_available() else 'cpu'

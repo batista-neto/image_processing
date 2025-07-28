@@ -42,7 +42,7 @@ def parse_args():
 
     # Basic settings
     parser.add_argument('--data-root', type=str, required=True)
-    parser.add_argument('--dataset', type=str, choices=['pascal', 'cityscapes'], default='pascal')
+    parser.add_argument('--dataset', type=str, choices=['pascal', 'cityscapes', 'ade'], default='ade')
     parser.add_argument('--batch-size', type=int, default=16)
     parser.add_argument('--lr', type=float, default=None)
     parser.add_argument('--epochs', type=int, default=None)
@@ -63,9 +63,24 @@ def parse_args():
     # Checkpoint resume argument
     parser.add_argument('--resume', type=str, default=None, help='Path to the checkpoint to resume from')
 
+    parser.add_argument('--config', type=str, default='configs/pascal.yaml', help='Caminho para o arquivo de configuração .yaml')
+
+
+    parser.add_argument('--gamma', type=float, help='Fator de ponderação da confiança no cálculo da perda')
+    parser.add_argument('--decay-factor', type=float, help='Fator de decaimento da confiança')
+    parser.add_argument('--base-threshold', type=float, help='Limiar base para pseudo-rotulagem')
+    parser.add_argument('--beta', type=float, help='Fator de suavização da função de threshold dinâmico')
+    parser.add_argument('--use-confidence-decay', action='store_true', help='Se ativo, aplica decaimento na confiança')
+
     args = parser.parse_args()
   
     cfg = yaml.load(open(args.config, "r"), Loader=yaml.Loader)
+    args.gamma = args.gamma if args.gamma is not None else cfg.get("gamma", 1.0)
+    args.decay_factor = args.decay_factor if args.decay_factor is not None else cfg.get("decay_factor", 0.9)
+    args.base_threshold = args.base_threshold if args.base_threshold is not None else cfg.get("base_threshold", 0.6)
+    args.beta = args.beta if args.beta is not None else cfg.get("beta", 0.5)
+    args.use_confidence_decay = args.use_confidence_decay or cfg.get("use_confidence_decay", False)
+
     return args
 
 #############################
@@ -226,7 +241,7 @@ def validate_and_checkpoint(model, valloader, criterion, optimizer, epoch, best_
     and saves a checkpoint if a new best is achieved.
     """
     model.eval()
-    metric = meanIOU(num_classes=21 if args.dataset == 'pascal' else 19)
+    metric = meanIOU(150 if args.dataset == 'ade' else 21 if args.dataset == 'pascal' else 19)
     total_loss = 0.0
 
     with torch.no_grad():
@@ -325,7 +340,7 @@ def select_reliable(models, dataloader, args):
             preds = [torch.argmax(model(img), dim=1).cpu().numpy() for model in models]
             mious = []
             for i in range(len(preds) - 1):
-                metric = meanIOU(num_classes=21 if args.dataset == 'pascal' else 19)
+                metric = meanIOU(num_classes=150 if args.dataset == 'ade' else 21 if args.dataset == 'pascal' else 19)
                 metric.add_batch(preds[i], preds[-1])
                 mious.append(metric.evaluate()[-1])
             reliability = sum(mious) / len(mious) if mious else 0.0
@@ -346,7 +361,7 @@ def label(model, dataloader, args):
     """
     model.eval()
     tbar = tqdm(dataloader, desc="Generating Pseudo-Labels")
-    metric = meanIOU(num_classes=21 if args.dataset == 'pascal' else 19)
+    metric = meanIOU(num_classes=150 if args.dataset == 'ade' else 21 if args.dataset == 'pascal' else 19)
     cmap = color_map(args.dataset)
     os.makedirs(args.pseudo_mask_path, exist_ok=True)
 
@@ -411,7 +426,7 @@ def init_basic_elems(args, device):
     Loads a pretrained backbone if applicable and converts BatchNorm layers for multi-GPU training.
     """
     model_zoo = {'deeplabv3plus': DeepLabV3Plus, 'pspnet': PSPNet, 'deeplabv2': DeepLabV2}
-    model = model_zoo[args.model](args.backbone, 21 if args.dataset == 'pascal' else 19)
+    model = model_zoo[args.model](args.backbone, 150 if args.dataset == 'ade' else 21 if args.dataset == 'pascal' else 19)
     
     # Convert BatchNorm to SyncBatchNorm for better multi-GPU training
     model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
@@ -441,7 +456,8 @@ if __name__ == '__main__':
     # Set default parameters based on the dataset
     dataset_defaults = {
         'pascal': {'epochs': 80, 'lr': 0.001, 'crop_size': 321},
-        'cityscapes': {'epochs': 240, 'lr': 0.004, 'crop_size': 721}
+        'cityscapes': {'epochs': 240, 'lr': 0.004, 'crop_size': 721},
+        'ade': {'epochs': 80, 'lr': 0.01, 'crop_size': 512},
     }
     defaults = dataset_defaults.get(args.dataset, {})
     args.epochs = args.epochs or defaults.get('epochs')

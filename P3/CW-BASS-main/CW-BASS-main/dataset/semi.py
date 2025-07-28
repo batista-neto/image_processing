@@ -4,6 +4,8 @@ import math
 import os
 from PIL import Image
 import random
+import numpy as np
+import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
 
@@ -51,23 +53,27 @@ class SemiDataset(Dataset):
                 self.ids = f.read().splitlines()
                 
              # Resize transform to ensure fixed size
-        self.resize_transform = transforms.Resize(fixed_size, interpolation=Image.NEAREST)
+        self.resize_transform = transforms.Resize((512, 512))
 
     def __getitem__(self, item):
         id = self.ids[item]
         img = Image.open(os.path.join(self.root, id.split(' ')[0]))
 
         if self.mode == 'val' or self.mode == 'label':
-            mask = Image.open(os.path.join(self.root, id.split(' ')[1]))
+            img = Image.open(os.path.join(self.root, id.split(' ')[0])).convert('RGB')
+            mask = Image.open(os.path.join(self.root, id.split(' ')[1])).convert('P')
+            # 🔧 Redimensiona antes de transformar
+            img = img.resize((512, 512), Image.BILINEAR)
+            mask = mask.resize((512, 512), Image.NEAREST)
             img, mask = normalize(img, mask)
             return img, mask, id
 
         if self.mode == 'train' or (self.mode == 'semi_train' and id in self.labeled_ids):
-            mask = Image.open(os.path.join(self.root, id.split(' ')[1]))
+            mask = Image.open(os.path.join(self.root, id.split(' ')[1])).convert('P')
         else:
             # mode == 'semi_train' and the id corresponds to unlabeled image
             fname = os.path.basename(id.split(' ')[1])
-            mask = Image.open(os.path.join(self.pseudo_mask_path, fname))
+            mask = Image.open(os.path.join(self.pseudo_mask_path, fname)).convert('P')
 
         # basic augmentation on all training images
         base_size = 400 if self.name == 'pascal' else 2048
@@ -84,6 +90,8 @@ class SemiDataset(Dataset):
             img, mask = cutout(img, mask, p=0.5)
 
         img, mask = normalize(img, mask)
+
+        
 
         return img, mask
 

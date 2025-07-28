@@ -1,0 +1,6 @@
+$env:semi_setting="pascal/1_8/split_0"; python -W ignore main.py --dataset pascal --data-root "." --batch-size 16 --backbone resnet50 --model deeplabv3plus --labeled-id-path "dataset/splits/$env:semi_setting/labeled.txt" --unlabeled-id-path "dataset/splits/$env:semi_setting/unlabeled.txt" --pseudo-mask-path "outdir/pseudo_masks/$env:semi_setting" --save-path "outdir/models/$env:semi_setting"
+
+
+$env:semi_setting="pascal/1_16/split_0"; python -W ignore main.py --dataset pascal --data-root "." --batch-size 16 --backbone resnet50 --model deeplabv3plus --labeled-id-path "dataset/splits/$env:semi_setting/labeled.txt" --unlabeled-id-path "dataset/splits/$env:semi_setting/unlabeled.txt" --pseudo-mask-path "outdir/pseudo_masks/$env:semi_setting" --save-path "outdir/models/$env:semi_setting"
+
+$env:semi_setting="ade/1_8/split_0"; python -W ignore main.py --dataset ade --data-root "." --batch-size 16 --backbone resnet50 --model deeplabv3plus --labeled-id-path "dataset/splits/$env:semi_setting/labeled.txt" --unlabeled-id-path "dataset/splits/$env:semi_setting/unlabeled.txt" --pseudo-mask-path "outdir/pseudo_masks/$env:semi_setting" --save-path "outdir/models/$env:semi_setting"

@@ -7,7 +7,8 @@ def count_params(model):
 
 class meanIOU:
     def __init__(self, num_classes):
-        self.num_classes = num_classes
+        self.num_classes = 150
+        self.hist = np.zeros((self.num_classes, self.num_classes), dtype=np.float64)
 
     def _compute_hist(self, label_pred, label_true):
         mask = (label_true >= 0) & (label_true < self.num_classes)
@@ -35,8 +36,25 @@ class meanIOU:
         # Return per-class IoU and mean IoU (ignoring classes with union=0)
         return iou, np.mean(iou[union > 0])
 
+    def add_batch(self, predictions, ground_truths):
+        """
+        predictions: numpy array of shape (B, H, W)
+        ground_truths: numpy array of shape (B, H, W)
+        """
+        for pred, gt in zip(predictions, ground_truths):
+            self.hist += self._compute_hist(pred.flatten(), gt.flatten())
+
+    def evaluate(self):
+        intersection = np.diag(self.hist)
+        union = self.hist.sum(axis=1) + self.hist.sum(axis=0) - intersection
+        iou = np.where(union > 0, intersection / union, 0)
+        miou = np.mean(iou[union > 0])
+        return iou, miou
+    
+
 
 def color_map(dataset='pascal'):
+    import matplotlib
     cmap = np.zeros((256, 3), dtype='uint8')
 
     if dataset == 'pascal' or dataset == 'coco':
@@ -74,6 +92,12 @@ def color_map(dataset='pascal'):
         cmap[16] = np.array([0, 80, 100])
         cmap[17] = np.array([0,  0, 230])
         cmap[18] = np.array([119, 11, 32])
+
+    elif dataset == 'ade':
+        cmap_ade = matplotlib.cm.get_cmap('tab20', 150)
+        for i in range(150):
+            rgba = cmap_ade(i)
+            cmap[i] = np.array([int(255 * rgba[0]), int(255 * rgba[1]), int(255 * rgba[2])])
 
     return cmap
 
